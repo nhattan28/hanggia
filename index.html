@@ -17,10 +17,21 @@
       box-sizing: border-box;
     }
 
+    h1 {
+      font-size: 28px;
+      color: #01579b;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
     .search-container {
       width: 100%;
       max-width: 600px;
       margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
     }
 
     .search-box {
@@ -30,7 +41,8 @@
       border-radius: 50px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      transition: all 0.3s ease;
+      flex: 1;
+      max-width: 550px;
     }
 
     .search-box input {
@@ -57,6 +69,21 @@
       background: #0277bd;
     }
 
+    .clear-button {
+      background: #d32f2f;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 50px;
+      transition: background 0.3s ease;
+    }
+
+    .clear-button:hover {
+      background: #b71c1c;
+    }
+
     .result-box {
       background: white;
       border-radius: 15px;
@@ -67,16 +94,54 @@
       font-size: 16px;
       color: #333;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      line-height: 1.6;
       box-sizing: border-box;
     }
 
+    .result-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-fake {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+
+    .status-investigating {
+      color: #f57c00;
+      font-weight: bold;
+    }
+
+    .reference {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-top: 20px;
+      max-width: 600px;
+      width: 100%;
+    }
+
     @media (max-width: 600px) {
-      .search-container {
-        width: 90%;
+      h1 {
+        font-size: 22px;
       }
 
-      .search-box input, .search-box button {
+      .search-container {
+        width: 90%;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .clear-button {
+        width: 100%;
         font-size: 14px;
         padding: 12px;
       }
@@ -85,33 +150,57 @@
         width: 90%;
         font-size: 14px;
       }
+
+      .reference {
+        width: 90%;
+        font-size: 12px;
+      }
     }
 
     @media (min-width: 601px) and (max-width: 1024px) {
+      h1 {
+        font-size: 24px;
+      }
+
       .search-container {
         width: 80%;
       }
 
-      .search-box input, .search-box button {
+      .search-box {
+        max-width: 80%;
+      }
+
+      .clear-button {
         font-size: 15px;
       }
 
       .result-box {
         width: 80%;
       }
+
+      .reference {
+        width: 80%;
+      }
     }
   </style>
 </head>
 <body>
+  <h1>KIỂM TRA SẢN PHẨM</h1>
+
   <div class="search-container">
     <div class="search-box">
       <input type="text" id="keyword" placeholder="Nhập tên sản phẩm sữa..." oninput="search()">
       <button onclick="search()">🔍 Tìm</button>
     </div>
+    <button class="clear-button" onclick="clearSearch()">Xóa</button>
   </div>
 
   <div class="result-box" id="results">
     Nhập từ khóa để tìm kiếm sản phẩm sữa.
+  </div>
+
+  <div class="reference">
+    Nội dung tham khảo: Vui lòng kiểm tra kỹ thông tin sản phẩm trước khi sử dụng.
   </div>
 
   <script src="danhsach.js"></script>
@@ -126,18 +215,26 @@
       }
 
       const results = milkProducts.filter(product => 
-        product.toLowerCase().includes(keyword.toLowerCase())
+        product.name.toLowerCase().includes(keyword.toLowerCase())
       );
 
       if (results.length === 0) {
         resultBox.innerText = '❌ Không tìm thấy sản phẩm phù hợp.';
       } else {
-        let output = '✅ Kết quả tìm kiếm:\n\n';
+        resultBox.innerHTML = '';
         results.forEach(product => {
-          output += '• ' + product + '\n';
+          const div = document.createElement('div');
+          div.className = 'result-item';
+          const statusClass = product.status === 'Giả' ? 'status-fake' : 'status-investigating';
+          div.innerHTML = `${product.name} (<span class="${statusClass}">${product.status}</span>) - ${product.company}`;
+          resultBox.appendChild(div);
         });
-        resultBox.innerText = output;
       }
+    }
+
+    function clearSearch() {
+      document.getElementById('keyword').value = '';
+      document.getElementById('results').innerText = 'Nhập từ khóa để tìm kiếm sản phẩm sữa.';
     }
   </script>
 </body>
