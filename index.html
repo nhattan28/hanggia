@@ -3,76 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hàng giả</title>
+  <title>Tìm kiếm sản phẩm sữa</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f5f5f5;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 40px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
     }
 
     .search-box {
       display: flex;
-      gap: 10px;
-      padding: 0;
-      margin-bottom: 15px;
-      width: 100%;
-      justify-content: center;
+      align-items: center;
+      background: white;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: all 0.3s ease;
     }
 
     .search-box input {
-      padding: 10px;
+      flex: 1;
+      padding: 14px 20px;
       font-size: 16px;
-      border: 1px solid #aaa;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 500px; /* Đảm bảo không quá rộng trên màn hình lớn */
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .search-button {
-      background-color: #e53935;
-      color: white;
-      font-weight: bold;
       border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      margin-bottom: 15px;
-      font-size: 16px;
+      outline: none;
+      background: transparent;
     }
 
-    .search-button:hover {
-      background-color: #c62828;
+    .search-box button {
+      background: #0288d1;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      border-radius: 0 50px 50px 0;
+    }
+
+    .search-box button:hover {
+      background: #0277bd;
     }
 
     .result-box {
-      border: 2px solid #fdd835;
-      background-color: #fffde7;
-      border-radius: 10px;
+      background: white;
+      border-radius: 15px;
       padding: 20px;
       width: 100%;
-      max-width: 800px; /* Đảm bảo không quá rộng */
+      max-width: 600px;
       min-height: 100px;
       font-size: 16px;
       color: #333;
-      white-space: pre-wrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      line-height: 1.6;
       box-sizing: border-box;
     }
 
-    /* Media query cho các thiết bị di động */
     @media (max-width: 600px) {
-      .search-box input {
+      .search-container {
         width: 90%;
       }
 
-      .search-button {
-        width: 90%;
+      .search-box input, .search-box button {
         font-size: 14px;
+        padding: 12px;
       }
 
       .result-box {
@@ -81,14 +87,12 @@
       }
     }
 
-    /* Media query cho các tablet (iPad, etc.) */
     @media (min-width: 601px) and (max-width: 1024px) {
-      .search-box input {
+      .search-container {
         width: 80%;
       }
 
-      .search-button {
-        width: 80%;
+      .search-box input, .search-box button {
         font-size: 15px;
       }
 
@@ -99,70 +103,42 @@
   </style>
 </head>
 <body>
-
-  <div class="search-box">
-    <input type="text" id="keyword" placeholder="Nhập từ khóa tìm kiếm...">
+  <div class="search-container">
+    <div class="search-box">
+      <input type="text" id="keyword" placeholder="Nhập tên sản phẩm sữa..." oninput="search()">
+      <button onclick="search()">🔍 Tìm</button>
+    </div>
   </div>
-
-  <button class="search-button" onclick="search()">🔍 Tìm kiếm</button>
 
   <div class="result-box" id="results">
-    Nhập từ khóa và nhấn "Tìm kiếm" để bắt đầu.
+    Nhập từ khóa để tìm kiếm sản phẩm sữa.
   </div>
 
+  <script src="danhsach.js"></script>
   <script>
-    async function search() {
+    function search() {
       const keyword = document.getElementById('keyword').value.trim();
+      const resultBox = document.getElementById('results');
+
       if (!keyword) {
-        document.getElementById('results').innerText = '❗ Vui lòng nhập từ khóa!';
+        resultBox.innerText = 'Nhập từ khóa để tìm kiếm sản phẩm sữa.';
         return;
       }
 
-      document.getElementById('results').innerText = '⏳ Đang tìm...';
+      const results = milkProducts.filter(product => 
+        product.toLowerCase().includes(keyword.toLowerCase())
+      );
 
-      const apiUrl = "https://script.google.com/macros/s/AKfycbwj1pTr3VBCQbsfcZm3nRBJk9eWrjhGAegRgxTRFsBUwRLgMEVMFCSW4Z-tNNGeqWFG/exec?q=" + encodeURIComponent(keyword);
-
-      try {
-        const response = await fetch(apiUrl);
-        const results = await response.json();
-
-        if (!results || results.length === 0) {
-          document.getElementById('results').innerText = '❌ Không tìm thấy kết quả.';
-        } else {
-          let output = '✅ Kết quả:\n\n';
-          const uniqueResults = new Set();  // Set để lưu các kết quả duy nhất
-
-          results.forEach(row => {
-            // Duyệt qua từng cột trong hàng
-            row.forEach(cell => {
-              const cellValue = cell.trim().toLowerCase(); // Chuyển giá trị ô thành chữ thường
-              const searchKeyword = keyword.toLowerCase(); // Chuyển từ khóa thành chữ thường
-
-              // Nếu ô chứa từ khóa (không phân biệt hoa thường)
-              if (cellValue.includes(searchKeyword)) {
-                // Tạo chuỗi dữ liệu từ hàng để hiển thị
-                const line = row.join(" | ").trim();
-                
-                if (line && !uniqueResults.has(line)) {
-                  uniqueResults.add(line);
-                  output += '• ' + line + '\n';
-                }
-              }
-            });
-          });
-
-          if (uniqueResults.size === 0) {
-            document.getElementById('results').innerText = '❌ Không tìm thấy kết quả.';
-          } else {
-            document.getElementById('results').innerText = output;
-          }
-        }
-      } catch (err) {
-        document.getElementById('results').innerText = '⚠️ Lỗi khi truy cập dữ liệu.';
-        console.error(err);
+      if (results.length === 0) {
+        resultBox.innerText = '❌ Không tìm thấy sản phẩm phù hợp.';
+      } else {
+        let output = '✅ Kết quả tìm kiếm:\n\n';
+        results.forEach(product => {
+          output += '• ' + product + '\n';
+        });
+        resultBox.innerText = output;
       }
     }
   </script>
-
 </body>
 </html>
